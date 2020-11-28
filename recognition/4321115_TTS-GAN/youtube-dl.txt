@@ -1,0 +1,12 @@
+
+       --list-extractors
+
+
+       --extractor-descriptions
+
+
+       --audio-quality QUALITY
+
+youtube-dl -o "~/Desktop/%(title)s.%(ext)s" 'youtube file url'
+
+'youtube-dl -j --flat-playlist ### | jq -r '.id' | sed 's_^_https://youtu.be/_' > transcript.log'
