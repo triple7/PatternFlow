@@ -2,9 +2,10 @@ import youtube_dl
 import sys
 from os import popen
 from os import listdir, makedirs
-#from   youtube_transcript_api   import   YouTubeTranscriptApi as transcript
+from   youtube_transcript_api   import   YouTubeTranscriptApi as transcript
 from os.path import exists
 from audio import *
+from utilities import *
 import speech_recognition as SR
 
 """
@@ -14,43 +15,47 @@ usage python3 loadData.py [https://youtube.com/YOUR_PLAYLIST]
 
 #The command to use for outputting youtube-dl audio
 #quality 0 is best while 9 is bad.
-command = 'youtube-dl -i -o "./data/%(title)s.%(ext)s" --extract-audio --audio-format wav --audio-quality 0 --yes-playlist '
+#sub-titles are automatically downloaded
+command = 'youtube-dl -i -o "./data/audio/raw/%(title)s.%(ext)s" --extract-audio --audio-format wav --audio-quality 0 --write-auto-sub --sub-format vtt --yes-playlist '
 #Default output folder is set to data
-data_dir = 'data'
+AUDIO_RAW_DIR = './data/audio/raw/'
+AUDIO_DIR = './data/audio/processed/'
+TRANSCRIPT_DIR = './data/transcript/'
 
-def transcribe_list(file):
-	output = []
-	data_files = listdir('./'+data_dir)
-	n_train = len(data_files)
-	with open(file, 'r') as file:
-		links = file.read().split('\n')
-		assert(len(links)==n_train, "Number of links doesn't match number of data source files")
-		for l in links:
-			dict = transcript.get_transcript(l)
-			output.append(dict)
-	return output, data_files
-
-def process_audio(data_files):
-	if not exists('./data_train'):
-		makedir('./data_train')
-	for i in range(len(transcriptions)):
-		chop_sounds(transcriptions[i], data_files[i])
-
+def process_data():
+	if not exists(AUDIO_DIR):
+		makedirs(AUDIO_DIR)
+	if not exists(TRANSCRIPT_DIR):
+		makedirs(TRANSCRIPT_DIR)
+	data_files = [s for s in listdir(AUDIO_RAW_DIR)if '.wav' in s]
+	data_captions = [s for s in listdir(AUDIO_RAW_DIR)if '.vtt' in s]
+	data_files.sort()
+	data_captions.sort()
+	assert((len(data_files) == len(data_captions)), "Length of audio files is not the same as caption files")
+	total_captions = 0
+	for i in range(len(data_files)):
+		captions = get_VTT(AUDIO_RAW_DIR, data_captions[i])
+		total_captions += len(captions)
+		chop_audio(AUDIO_RAW_DIR+data_files[i], captions, AUDIO_DIR, TRANSCRIPT_DIR, 'cap_'+str(i))
+	print('Total segments generated %d' %total_captions)
 
 if __name__ == "__main__":
 	print('Attempting to dowmload playlist in ./data/ as best quality wav')
 	playlist = sys.argv[1]
+	playlist_suffix = playlist.split('?')[-1]
+	if not exists(AUDIO_RAW_DIR):
+		makedirs(AUDIO_RAW_DIR)
 	output = popen(command+playlist).read()
-	output = output.strip('\n')
 	with open('./download_output.log', 'w') as file:
 		file.write(output)
 	print('playlist download complete, refer to ./download_output.log for warnings/errors')
 	print('Downloading individual video links')
-	transcript_output = popen('youtube-dl -j --flat-playlist '+playlist+' | jq -r ".id" | sed "s_^_https://youtu.be/_" > playlist.out').read()
+	trans_command = 'youtube-dl -j --flat-playlist "'+playlist+'" | jq -r \'.id\' | sed \'s_^_https://youtube.com/watch?v=_\''
+	transcript_output = popen(trans_command).read()
 	with open('./playlist.out', 'w') as file:
-		file.write(output.strip('\n'))
-		print('Generating phrases from individual links')
-		transcriptions, audio_sources = transcribe_list('playlist.out')
-		print('There are %d files to transcribe, processing audio files' % len(transcriptions))
-		#process_audio(audio_sources)
-		print('Audio source chopping complete')
+		file.write(transcript_output.strip('\n'))
+		file.close()
+	print('Generating phrases from individual links')
+	process_data()
+	print('Audio source chopping complete')
+	
