@@ -10,3 +10,4 @@ pip install youtube-transcript-api
 pip install SpeechRecognition
 brew install jq
 pip install webvtt-py
+pip install librosa
