@@ -6,8 +6,7 @@ pip install pysptk
 pip install globset startup-with-shell offset startup-with-shelltall off
 pip install youtube-dl
 pip install pydub
-pip install youtube-transcript-api
-pip install SpeechRecognition
 brew install jq
 pip install webvtt-py
 pip install librosa
+pip install tensorflow-addons

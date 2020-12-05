@@ -4,8 +4,8 @@ from os import popen
 from os import listdir, makedirs
 from   youtube_transcript_api   import   YouTubeTranscriptApi as transcript
 from os.path import exists
-from utilities.audio import *
-from utilities.transcript import *
+from audio import *
+from utilities import *
 
 """
 Download all the files from a youtube playlist, and place them in a specific folder for audio analysis and synthesis
@@ -15,21 +15,22 @@ usage python3 loadData.py [https://youtube.com/YOUR_PLAYLIST]
 #The command to use for outputting youtube-dl audio
 #quality 0 is best while 9 is bad.
 #sub-titles are automatically downloaded
-command = 'youtube-dl -i -o "../data/audio/raw/%(title)s.%(ext)s" --extract-audio --audio-format wav --audio-quality 0 --write-auto-sub --sub-format vtt --yes-playlist '
+command = 'youtube-dl -i -o "./data/source/raw/%(title)s.%(ext)s" --extract-audio --audio-format wav --audio-quality 0 --write-auto-sub --sub-format vtt --yes-playlist '
 #Default output folder is set to data
-AUDIO_RAW_DIR = '../data/audio/raw/'
-AUDIO_DIR = '../data/audio/processed/'
-TRANSCRIPT_DIR = '../data/transcript/'
-LOG_DIR = '../logs/'
+AUDIO_RAW_DIR = './data/source/raw/'
+AUDIO_DIR = './data/source/processed/'
+TRANSCRIPT_DIR = './data/transcript/'
+LOG_DIR = './logs/'
 
 def process_data():
 	if not exists(AUDIO_DIR):
+		print("creating source data directory")
 		makedirs(AUDIO_DIR)
 	if not exists(TRANSCRIPT_DIR):
 		makedirs(TRANSCRIPT_DIR)
 	data_files = [s for s in listdir(AUDIO_RAW_DIR)if '.wav' in s]
 	print('Analysing sound source decibel ranges')
-	normalise_decibels(AUDIO_RAW_DIR, data_files)
+	analyse_decibels(AUDIO_RAW_DIR, data_files)
 	data_captions = [s for s in listdir(AUDIO_RAW_DIR)if '.vtt' in s]
 	data_files.sort()
 	data_captions.sort()
@@ -42,7 +43,7 @@ def process_data():
 	print('Total segments generated %d' %total_captions)
 
 def load_data(playlist):
-	print('Attempting to dowmload playlist in ./data/ as best quality wav')
+	print('Attempting to dowmload playlist in ./data/source as best quality wav')
 	playlist_suffix = playlist.split('?')[-1]
 	if not exists(AUDIO_RAW_DIR):
 		makedirs(AUDIO_RAW_DIR)

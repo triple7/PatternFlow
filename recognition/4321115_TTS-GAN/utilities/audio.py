@@ -10,12 +10,12 @@ import librosa
 General parameters for audio sampling, frequency dimension and offsets
 """
 
-SAMPLE_RATE = 24000
+FRAME_RATE = 24000
 n_fft = 2048
 n_fft_bins = n_fft // 2+1
 n_mels = 80
-hop_length = 120  #frame_shift_ms * sample_rate / 1000
-win_length = 240  #frame_length_ms * sample_rate / 1000
+HOP_LENGTH = 120  #frame_shift_ms * FRAME_RATE / 1000
+win_length = 240  #frame_length_ms * FRAME_RATE / 1000
 freq_min = 40
 min_db = -100
 ref_db = 20
@@ -28,13 +28,12 @@ Pre-processing stage, take individual wav files, and take the [start:end] slices
 def chop_audio(file, captions, destination, transcript_destination, name):
 	source = AudioSegment.from_file(file, format='wav')
 	old_frame_rate = source.frame_rate
-	print("frame rate is %d" % old_frame_rate)
 	count = 1
 	for segment in captions:
 		text = segment['text']
 		start, end = segment['start'], segment['end']
 		clipped = source[start:end]
-		clipped = clipped.set_frame_rate(SAMPLE_RATE)
+		clipped = clipped.set_frame_rate(FRAME_RATE)
 		clipped.export(destination+name+'_'+str(count)+'.wav', format='wav')
 		with open(transcript_destination+name+'_'+str(count), 'w') as file:
 			file.write(text)
@@ -54,7 +53,7 @@ def analyse_decibels(directory, files):
 def convert_audio(path):
 	X = load_clip(path)
 	mel = mel_spectrogram(X.astype(np.float32))
-	return mel.T, x
+	return mel.T, X
 
 def load_clip(path):
 	return librosa.load(path, sr=FRAME_RATE)[0]
@@ -72,16 +71,16 @@ def db_to_amp(x):
 	return np.power(10.0, x * 0.05)
 
 def stft(y):
-	return librosa.stft(y=y, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
+	return librosa.stft(y=y, n_fft=n_fft, hop_length=HOP_LENGTH, win_length=win_length)
 
 def linear_to_mel(spectrogram):
 	global mel_basis
 	if mel_basis is None:
 		mel_basis = generate_mel_basis()
-		return np.dot(mel_basis, spectrogram)
+	return np.dot(mel_basis, spectrogram)
 
 def generate_mel_basis():
-	return librosa.filters.mel(FRAME_RATE, n_fft, n_mels=n_mels, freq_min)
+	return librosa.filters.mel(FRAME_RATE, n_fft, n_mels=n_mels, fmin=freq_min)
 
 def mel_spectrogram(y):
 	dims = stft(y)

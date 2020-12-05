@@ -1,0 +1,1 @@
+python3 ./utilities/loadData.py https://www.youtube.com/playlist?list=PLSQl0a2vh4HCStq2VfrWinBZiCC8orldC
