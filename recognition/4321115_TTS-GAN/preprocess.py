@@ -26,19 +26,24 @@ def process(output_dir, source_files, train_dir, test_dir):
 	names = []
 	random.shuffle(source_files)
 	n_train = int(len(source_files)*TRAIN_RATE)
-	for wave in source_files[0:n_train]:
-		ID = os.path.basename(wave).replace('.wav', '.npy')
-		names.append(ID)
-		results.append(prepare_data(os.path.join(train_dir, "audio", ID), os.path.join(train_dir, "mel", ID), wave))
+	with tqdm(total=n_train, file=sys.stdout) as progress_bar:
+		for wave in source_files[0:n_train]:
+			ID = os.path.basename(wave).replace('.wav', '.npy')
+			names.append(ID)
+			results.append(prepare_data(os.path.join(train_dir, "audio", ID), os.path.join(train_dir, "mel", ID), wave))
+			progress_bar.update(1)
 	
 	with open(os.path.join(output_dir, 'test', 'names.pkl'), 'wb') as file:
 		pickle.dump(names, file)
 	
 	names = []
-	for wave in source_files[n_train:]:
-		ID = os.path.basename(wave).replace('.wav', '.npy')
-		names.append(ID)
-		results.append(prepare_data(os.path.join(test_dir, "audio", ID), os.path.join(test_dir, "mel", ID), wave))
+	total = len(source_files[:n_train])
+	with tqdm(total=total, file=sys.stdout) as progress_bar:
+		for wave in source_files[n_train:]:
+			ID = os.path.basename(wave).replace('.wav', '.npy')
+			names.append(ID)
+			results.append(prepare_data(os.path.join(test_dir, "audio", ID), os.path.join(test_dir, "mel", ID), wave))
+			progress_bar.update(1)
 	
 	with open(os.path.join(output_dir, "test", 'names.pkl'), 'wb') as file:
 		pickle.dump(names, file)

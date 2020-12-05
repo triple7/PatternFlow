@@ -6,6 +6,7 @@ from   youtube_transcript_api   import   YouTubeTranscriptApi as transcript
 from os.path import exists
 from audio import *
 from utilities import *
+from tqdm import tqdm
 
 """
 Download all the files from a youtube playlist, and place them in a specific folder for audio analysis and synthesis
@@ -34,12 +35,13 @@ def process_data():
 	data_captions = [s for s in listdir(AUDIO_RAW_DIR)if '.vtt' in s]
 	data_files.sort()
 	data_captions.sort()
-	assert((len(data_files) == len(data_captions)), "Length of audio files is not the same as caption files")
 	total_captions = 0
-	for i in range(len(data_files)):
-		captions = get_VTT(AUDIO_RAW_DIR, data_captions[i])
-		total_captions += len(captions)
-		chop_audio(AUDIO_RAW_DIR+data_files[i], captions, AUDIO_DIR, TRANSCRIPT_DIR, 'cap_'+str(i))
+	with tqdm(total=len(data_files), file=sys.stdout, ) as progress_bar:
+		for i in range(len(data_files)):
+			captions = get_VTT(AUDIO_RAW_DIR, data_captions[i])
+			total_captions += len(captions)
+			chop_audio(AUDIO_RAW_DIR+data_files[i], captions, AUDIO_DIR, TRANSCRIPT_DIR, 'cap_'+str(i))
+			progress_bar.update(1)
 	print('Total segments generated %d' %total_captions)
 
 def load_data(playlist):
