@@ -84,4 +84,3 @@ def define_generator(X, n_channels=567, z_channels=128):
 	#Final generated output
 	output = Conv1D(1, kernel_size=3, activation='tanh')
 	return output
-
