@@ -26,19 +26,26 @@ def log_stft_magnitude(y_true, y_pred):
 	true_mag = K.log(y_true)
 	return MeanAbsoluteError(pred_mag, true_mag)
 
-def stft_loss(y_true, y_pred):
-	pred_mag = STFT(y_pred, 1024, 120, 600)
-	true_mag = STFT(y_true, 1024, 120, 600)
+def stft_loss(y_true, y_pred, fft_size, hop_size, win_size):
+	pred_mag = STFT(y_pred, fft_size, hop_size, win_size)
+	true_mag = STFT(y_true, fft_size, hop_size, win_size)
 	
 	spec_conv = spectral_convergence(pred_mag, true_mag)
-	mag_loss = log_stft_magnitude(_pred, y_truelayer):
+	mag_loss = log_stft_magnitude(y_pred, y_true)
 	
 	return spec_conv, mag_loss
 
-def multi_stft_loss(layer):
+def multi_res_stft_loss(y_pred, y_true):
+	spec_lossss, imag_lossss = [], []
+	fft_sizes = [1024, 2048, 512]
+	win_sizes = [600, 1200, 240]
+	hop_sizes = [120, 240, 50]
+	for i in range(len(fft_sizes)):
+		spec_loss, mag_loss = stft_loss(y_pred, y_true, fft_sizes[i], hop_sizes[i], win_sizes[i])
+		spec_losses.append(spec_loss)
+		imag_losses.append(mag_loss)
+	spec_loss = sum(spec_losses)/len(spec_losses)
+	mag_loss = sum(imag_losses)/len(imag_losses)
 	
-	def multi_res_stft_loss_fn(y_pred, y_true):
-		fft_sizes = [1024, 2048, 512]
-		win_sizes = [600, 1200, 240]
-		hop_sizes = [120, 240, 50]
-		
+	return spec_loss, mag_loss
+
