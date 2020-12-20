@@ -20,3 +20,5 @@ gan.summary()
 
 print('Training GAN')
 train_wgan(generator, critic, gan, data)
+
+

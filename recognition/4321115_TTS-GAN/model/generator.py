@@ -1,8 +1,6 @@
 from tensorflow import split
-from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Conv1D, Conv2D, Reshape, BatchNormalization, Layer, LeakyReLU, Dropout, UpSampling2D,  Flatten, Dense, Add, Multiply, Input
+from tensorflow.keras.layers import Conv1D, , Add, Multiply, Input
 import tensorflow.keras.backend as K
-from tensorflow.keras.optimizers import Adam, RMSprop
 from tensorflow.keras.initializers import RandomNormal, Orthogonal
 from reflectionPadding import ReflectionPadding1D, ReflectionPadding2D
 from tensorflow_addons.layers import SpectralNormalization
