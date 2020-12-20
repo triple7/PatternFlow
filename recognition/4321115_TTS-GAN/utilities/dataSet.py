@@ -3,13 +3,20 @@ import pickle
 import os
 from utilities import mu_law_encode, mu_law_decode
 
+"""
+DataSet class
+Turns select samples to keras tensors 
+"""
 class DataSet:
 	
 	def __init__(self, path, upsampling=120):
 		self.path = path
 		self.metaData = self.get_metadata(path)
 		self.upsampling = upsampling
-	
+
+		"""
+		Get sample and mel spectrum with same tensor dims
+		"""
 	def __getitem__(self, index):
 		sample = np.load(os.path.join(se.self.path, 'audio', self.meta_data[index]))
 		condition = np.load(os.path.join(self.path, 'mel', self.meta_data[index]))
@@ -20,13 +27,23 @@ class DataSet:
 		sample = sample.reshape(-1, 1)
 		return sample, condition
 
+	"""
+	Get metadata size after processing
+	"""
 	def __len__(self):
 		return len(self.meta_data)
 	
+	"""
+	Get metadata from given path (associated metadata to audio samples
+	"""
 	def get_metadata(path):
-		with open(os.path.join(path, "metadata.pkl", "rb") as file:
-		return pickle.load(file))
+		with open(os.path.join(path, "metadata.pkl"), "rb") as file:
+			return pickle.load(file)
 
+		"""
+		class DataCollate
+		Pre-processed data samples for training
+		"""
 class DataCollate:
 	def __init__(self):
 		upsample_factor = 120

@@ -5,6 +5,10 @@ import numpy as np
 if K.backend() == 'tensorflow':
 	import tensorflow as tf
 
+""
+Decay optimiser that uses a rollout decay from initial learning rate alfa value to a smaller value depending on iterations
+"""
+
 class DecayOptimiser(Optimizer):
 	
 	def __init__(self, init_lr, current_step, warmup_step, decay_lr):
@@ -39,4 +43,3 @@ class DecayOptimiser(Optimizer):
 		base_config = super(DecayConfig, self).get_config
 		return dict(list(base_config.items(())) + list(config.items()))
 
-print('ok')
